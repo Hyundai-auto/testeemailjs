@@ -274,22 +274,48 @@ function validateCardExpiry(expiry) {
     return parseInt(year) > currentYear || (parseInt(year) === currentYear && parseInt(month) >= currentMonth);
 }
 
+// =================================================================================
+// Funções de submissão de formulário (REVISADAS)
+// =================================================================================
+
 async function handleContactSubmit(e) {
+    // --- CORREÇÃO ---
+    // 1. Adiciona um log para confirmar que a função foi chamada.
+    console.log("handleContactSubmit foi acionado!");
+
+    // 2. Impede o comportamento padrão do formulário (recarregar a página).
+    // Esta é a linha mais importante para resolver o problema.
     e.preventDefault();
+
+    // 3. Valida os campos da etapa atual.
     if (validateCurrentStep()) {
+        console.log("Validação da Etapa 1 passou. Avançando para a Etapa 2.");
         const formData = new FormData(e.target);
         window.checkoutData = { ...window.checkoutData, ...Object.fromEntries(formData) };
+        
+        // 4. Chama a função para ir para a próxima etapa.
         goToStep(2);
+    } else {
+        // --- MELHORIA ---
+        // Informa no console se a validação falhou.
+        console.warn("Validação da Etapa 1 falhou. O avanço foi bloqueado.");
     }
 }
+
 async function handleShippingSubmit(e) {
+    console.log("handleShippingSubmit foi acionado!");
     e.preventDefault();
     if (validateCurrentStep()) {
+        console.log("Validação da Etapa 2 passou. Avançando para a Etapa 3.");
         const formData = new FormData(e.target);
         window.checkoutData = { ...window.checkoutData, ...Object.fromEntries(formData), shippingMethod: selectedShipping };
         goToStep(3);
+    } else {
+        console.warn("Validação da Etapa 2 falhou. O avanço foi bloqueado.");
     }
 }
+
+// A função handlePaymentSubmit já está correta, não precisa de alterações.
 async function handlePaymentSubmit(e) {
     e.preventDefault();
     if (!validateCurrentStep()) {
@@ -322,6 +348,9 @@ async function handlePaymentSubmit(e) {
         document.getElementById('loadingOverlay').style.display = 'none';
     }
 }
+
+// (O restante do seu código permanece o mesmo)
+
 
 async function processPixPayment(orderData) {
     const pixData = {
